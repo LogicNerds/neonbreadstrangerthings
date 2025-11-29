@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Which Stranger Things Character Are You?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff00ff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Retro scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .title-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: clamp(24px, 6vw, 36px);
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            animation: flicker 3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.95; }
+        }
+
+        .subtitle {
+            color: #ff0000;
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .start-btn, .option-btn, .restart-btn {
+            background: #ff0000;
+            color: #000;
+            border: 3px solid #ff0000;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px #ff0000;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .start-btn:active, .restart-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        .quiz-container {
+            display: none;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        .quiz-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            background: #1a1a1a;
+            border: 2px solid #ff0000;
+            height: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff0000, #ff6666);
+            height: 100%;
+            width: 0;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .question-card {
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            color: #ff0000;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .question-text {
+            font-size: clamp(18px, 4.5vw, 22px);
+            margin-bottom: 25px;
+            line-height: 1.4;
+            text-shadow: 0 0 8px #ff0000;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: transparent;
+            border: 2px solid #ff0000;
+            padding: 18px;
+            font-size: 16px;
+            text-align: left;
+            box-shadow: none;
+            color: #ff0000;
+            max-width: none;
+            line-height: 1.4;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .option-btn:active {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding-top: 40px;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-character {
+            font-size: clamp(32px, 8vw, 48px);
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+            color: #ff0000;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; }
+            50% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000; }
+        }
+
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #ff0000;
+        }
+
+        .result-description {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #ff0000;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .result-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 20px #ff0000;
+            margin: 20px auto 30px auto;
+            display: block;
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 400px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .option-btn {
+                padding: 15px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title Screen -->
+        <div class="title-screen" id="titleScreen">
+            <h1>WHICH STRANGER THINGS CHARACTER ARE YOU?</h1>
+            <p class="subtitle">12 questions · 100% vibes</p>
+            <button class="start-btn" onclick="startQuiz()">START QUIZ</button>
+        </div>
+
+        <!-- Quiz Container -->
+        <div class="quiz-container" id="quizContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="questionsContainer"></div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-character" id="resultCharacter"></div>
+            <h2 class="result-title">You Are...</h2>
+            <p class="result-description" id="resultDescription"></p>
+            <button class="restart-btn" onclick="restartQuiz()">TAKE AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What's your role in a friend group?",
+                options: [
+                    { text: "The one who jumps in without thinking", chars: ["Eleven"] },
+                    { text: "The 'we need a plan' person", chars: ["Mike", "Robin"] },
+                    { text: "The hype-machine keeping morale up", chars: ["Dustin"] },
+                    { text: "The realist telling everyone to calm down", chars: ["Lucas", "Max", "Erica"] }
+                ]
+            },
+            {
+                question: "How do you deal with fear?",
+                options: [
+                    { text: "Fight first, process later", chars: ["Eleven", "Billy", "Vecna"] },
+                    { text: "Overthink it while doing it anyway", chars: ["Mike"] },
+                    { text: "Talk through it nervously but keep going", chars: ["Dustin"] },
+                    { text: "Shrug and handle business", chars: ["Lucas", "Max", "Steve", "Will"] }
+                ]
+            },
+            {
+                question: "Favorite weekend energy?",
+                options: [
+                    { text: "Wandering alone with headphones", chars: ["Max"] },
+                    { text: "Deep conversations at 2am", chars: ["Mike", "Eleven", "Karen"] },
+                    { text: "Building something weird with friends", chars: ["Dustin", "Will"] },
+                    { text: "Whatever gets you out of the house and moving", chars: ["Lucas", "Steve"] }
+                ]
+            },
+            {
+                question: "Pick a snack during a stressful moment.",
+                options: [
+                    { text: "Anything sweet", chars: ["Dustin"] },
+                    { text: "Chips or something loud", chars: ["Lucas", "Erica"] },
+                    { text: "Whatever's easiest", chars: ["Mike"] },
+                    { text: "I'm not hungry right now", chars: ["Eleven", "Max", "Robin"] }
+                ]
+            },
+            {
+                question: "How do you respond when someone is wrong online?",
+                options: [
+                    { text: "Drop a sarcastic one-liner", chars: ["Robin", "Erica"] },
+                    { text: "Scroll past and move on", chars: ["Lucas", "Steve", "Karen"] },
+                    { text: "Write a whole paragraph", chars: ["Mike", "Will"] },
+                    { text: "Get weirdly passionate", chars: ["Eleven", "Max", "Dustin", "Billy", "Vecna"] }
+                ]
+            },
+            {
+                question: "Your communication style:",
+                options: [
+                    { text: "Direct to the point of chaos", chars: ["Eleven", "Billy", "Vecna"] },
+                    { text: "Long, emotional, slightly dramatic", chars: ["Mike"] },
+                    { text: "Fast, enthusiastic, rambling", chars: ["Dustin"] },
+                    { text: "Dry, clever, and blunt", chars: ["Robin", "Max", "Steve", "Erica"] }
+                ]
+            },
+            {
+                question: "What motivates you most?",
+                options: [
+                    { text: "Protecting the people you care about", chars: ["Eleven", "Steve", "Karen", "Billy"] },
+                    { text: "Feeling understood", chars: ["Mike", "Will"] },
+                    { text: "Solving a puzzle", chars: ["Dustin", "Robin"] },
+                    { text: "Earning respect", chars: ["Lucas", "Max", "Erica", "Vecna"] }
+                ]
+            },
+            {
+                question: "Pick a bad habit you relate to:",
+                options: [
+                    { text: "Bottling things up", chars: ["Eleven", "Max", "Will", "Billy", "Vecna"] },
+                    { text: "Saying 'it's fine' when it isn't", chars: ["Mike", "Karen"] },
+                    { text: "Taking on too much", chars: ["Steve"] },
+                    { text: "Talking too much when nervous", chars: ["Dustin", "Robin"] }
+                ]
+            },
+            {
+                question: "What's your vibe in a crisis?",
+                options: [
+                    { text: "I'll handle it.", chars: ["Eleven", "Steve", "Billy", "Vecna"] },
+                    { text: "We need a strategy.", chars: ["Mike", "Robin"] },
+                    { text: "It's gonna be okay!", chars: ["Dustin", "Karen"] },
+                    { text: "Everyone relax, seriously.", chars: ["Lucas", "Max", "Erica"] }
+                ]
+            },
+            {
+                question: "Choose your aesthetic:",
+                options: [
+                    { text: "Bold, messy, powerful", chars: ["Eleven", "Billy"] },
+                    { text: "Soft and emotional", chars: ["Mike", "Will", "Karen"] },
+                    { text: "Nerdy retro chaos", chars: ["Dustin"] },
+                    { text: "Comfortable, practical", chars: ["Lucas", "Steve", "Max", "Robin", "Erica"] }
+                ]
+            },
+            {
+                question: "How do you act when you like someone?",
+                options: [
+                    { text: "Awkward and intense", chars: ["Eleven", "Billy", "Vecna"] },
+                    { text: "Overcommunicate", chars: ["Mike", "Will", "Karen"] },
+                    { text: "Turn into a flustered comedian", chars: ["Dustin"] },
+                    { text: "Pretend you don't care", chars: ["Max", "Robin", "Steve", "Erica"] }
+                ]
+            },
+            {
+                question: "What's your go-to escape?",
+                options: [
+                    { text: "Music", chars: ["Max"] },
+                    { text: "Adventure or physical activity", chars: ["Lucas", "Steve", "Billy"] },
+                    { text: "Daydreaming", chars: ["Mike", "Eleven", "Vecna"] },
+                    { text: "Learning something niche", chars: ["Dustin", "Robin", "Will", "Karen"] }
+                ]
+            }
+        ];
+
+        const characterResults = {
+            Eleven: {
+                name: "Eleven",
+                description: "Quiet intensity, big feelings, laser focus. You're powered by instinct and loyalty. People underestimate you… until they shouldn't."
+            },
+            Mike: {
+                name: "Mike",
+                description: "Anxious heart, big soul. You care deeply, sometimes too much, and it shows — but that's your superpower."
+            },
+            Dustin: {
+                name: "Dustin",
+                description: "You're enthusiasm in human form. Smart, curious, and accidentally hilarious."
+            },
+            Lucas: {
+                name: "Lucas",
+                description: "Level-headed, practical, reliable. You're the calm voice when the world melts down."
+            },
+            Max: {
+                name: "Max",
+                description: "Independent, sharp, slightly guarded. You've got depth people don't always see at first glance."
+            },
+            Steve: {
+                name: "Steve",
+                description: "Protective golden retriever energy wrapped in mild chaos. Unexpectedly responsible."
+            },
+            Robin: {
+                name: "Robin",
+                description: "Witty, analytical, and allergic to BS. The friend who sees everything."
+            },
+            Will: {
+                name: "Will",
+                description: "Creative, sensitive, quietly brave. You feel everything deeply and express it through art. Underestimated but unbreakable."
+            },
+            Erica: {
+                name: "Erica",
+                description: "Blunt, fearless, and unapologetically yourself. You're smarter than everyone in the room and you know it. Chaos with confidence."
+            },
+            Vecna: {
+                name: "Vecna",
+                description: "Dark, intense, misunderstood. You see the world differently and aren't afraid to burn it all down. Complex villain energy."
+            },
+            Billy: {
+                name: "Billy",
+                description: "Intense, damaged, complicated. You put up walls but there's more underneath. Protective instincts wrapped in chaos."
+            },
+            Karen: {
+                name: "Karen",
+                description: "Caring, responsible, secretly yearning for more. You hold everything together while quietly dreaming of escape."
+            }
+        };
+
+        const tiebreakOrder = ["Eleven", "Max", "Dustin", "Steve", "Robin", "Lucas", "Mike", "Will", "Erica", "Billy", "Vecna", "Karen"];
+
+        let currentQuestion = 0;
+        let scores = {
+            Eleven: 0,
+            Mike: 0,
+            Dustin: 0,
+            Lucas: 0,
+            Max: 0,
+            Steve: 0,
+            Robin: 0,
+            Will: 0,
+            Erica: 0,
+            Vecna: 0,
+            Billy: 0,
+            Karen: 0
+        };
+
+        function startQuiz() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('quizContainer').classList.add('active');
+            renderQuestions();
+            showQuestion(0);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `question-${index}`;
+
+                const optionsHTML = q.options.map((opt, optIndex) => 
+                    `<button class="option-btn" onclick="selectAnswer(${index}, ${optIndex})">${opt.text}</button>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="question-number">QUESTION ${index + 1} OF ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">${optionsHTML}</div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function showQuestion(index) {
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`question-${index}`).classList.add('active');
+            updateProgress(index);
+        }
+
+        function updateProgress(questionIndex) {
+            const progress = ((questionIndex) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function selectAnswer(questionIndex, optionIndex) {
+            const selectedOption = questions[questionIndex].options[optionIndex];
+            
+            // Add points to all mapped characters
+            selectedOption.chars.forEach(char => {
+                scores[char]++;
+            });
+
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                setTimeout(() => {
+                    showQuestion(currentQuestion);
+                }, 200);
+            } else {
+                setTimeout(() => {
+                    showResults();
+                }, 300);
+            }
+        }
+
+        function showResults() {
+            // Find highest score
+            let maxScore = Math.max(...Object.values(scores));
+            let winners = Object.keys(scores).filter(char => scores[char] === maxScore);
+
+            // Use tiebreaker if needed
+            let finalCharacter;
+            if (winners.length > 1) {
+                finalCharacter = tiebreakOrder.find(char => winners.includes(char));
+            } else {
+                finalCharacter = winners[0];
+            }
+
+            const result = characterResults[finalCharacter];
+
+            document.getElementById('quizContainer').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+            document.getElementById('resultCharacter').textContent = result.name.toUpperCase();
+            document.getElementById('resultDescription').textContent = result.description;
+            updateProgress(questions.length);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            scores = {
+                Eleven: 0,
+                Mike: 0,
+                Dustin: 0,
+                Lucas: 0,
+                Max: 0,
+                Steve: 0,
+                Robin: 0,
+                Will: 0,
+                Erica: 0,
+                Vecna: 0,
+                Billy: 0,
+                Karen: 0
+            };
+
+            document.getElementById('resultScreen').classList.remove('active');
+            document.getElementById('titleScreen').style.display = 'flex';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+    </script>
+</body>
+</html>
