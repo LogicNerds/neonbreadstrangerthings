@@ -285,6 +285,7 @@
             <div class="result-character" id="resultCharacter"></div>
             <h2 class="result-title">You Are...</h2>
             <p class="result-description" id="resultDescription"></p>
+            <img id="resultImage" class="result-image" alt="Character" />
             <button class="restart-btn" onclick="restartQuiz()">TAKE AGAIN</button>
         </div>
     </div>
@@ -404,55 +405,71 @@
         const characterResults = {
             Eleven: {
                 name: "Eleven",
-                description: "Quiet intensity, big feelings, laser focus. You're powered by instinct and loyalty. People underestimate you… until they shouldn't."
+                description: "Quiet intensity, big feelings, laser focus. You're powered by instinct and loyalty. People underestimate you… until they shouldn't.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/eleven.jpg"
             },
             Mike: {
                 name: "Mike",
-                description: "Anxious heart, big soul. You care deeply, sometimes too much, and it shows — but that's your superpower."
+                description: "Anxious heart, big soul. You care deeply, sometimes too much, and it shows — but that's your superpower.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/mike.jpg"
             },
             Dustin: {
                 name: "Dustin",
-                description: "You're enthusiasm in human form. Smart, curious, and accidentally hilarious."
+                description: "You're enthusiasm in human form. Smart, curious, and accidentally hilarious.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/dustin.png"
             },
             Lucas: {
                 name: "Lucas",
-                description: "Level-headed, practical, reliable. You're the calm voice when the world melts down."
+                description: "Level-headed, practical, reliable. You're the calm voice when the world melts down.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/lucas.jpg"
             },
             Max: {
                 name: "Max",
-                description: "Independent, sharp, slightly guarded. You've got depth people don't always see at first glance."
+                description: "Independent, sharp, slightly guarded. You've got depth people don't always see at first glance.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/max.jpg"
             },
             Steve: {
                 name: "Steve",
-                description: "Protective golden retriever energy wrapped in mild chaos. Unexpectedly responsible."
+                description: "Protective golden retriever energy wrapped in mild chaos. Unexpectedly responsible.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/steve.png"
             },
             Robin: {
                 name: "Robin",
-                description: "Witty, analytical, and allergic to BS. The friend who sees everything."
+                description: "Witty, analytical, and allergic to BS. The friend who sees everything.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/robin.jpg"
             },
             Will: {
                 name: "Will",
-                description: "Creative, sensitive, quietly brave. You feel everything deeply and express it through art. Underestimated but unbreakable."
+                description: "Creative, sensitive, quietly brave. You feel everything deeply and express it through art. Underestimated but unbreakable.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/willpower.jpg"
             },
             Erica: {
                 name: "Erica",
-                description: "Blunt, fearless, and unapologetically yourself. You're smarter than everyone in the room and you know it. Chaos with confidence."
+                description: "Blunt, fearless, and unapologetically yourself. You're smarter than everyone in the room and you know it. Chaos with confidence.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/erica.png"
             },
             Vecna: {
                 name: "Vecna",
-                description: "Dark, intense, misunderstood. You see the world differently and aren't afraid to burn it all down. Complex villain energy."
+                description: "Dark, intense, misunderstood. You see the world differently and aren't afraid to burn it all down. Complex villain energy.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/vecna.png"
             },
             Billy: {
                 name: "Billy",
-                description: "Intense, damaged, complicated. You put up walls but there's more underneath. Protective instincts wrapped in chaos."
+                description: "Intense, damaged, complicated. You put up walls but there's more underneath. Protective instincts wrapped in chaos.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/Billy.png"
             },
             Karen: {
                 name: "Karen",
-                description: "Caring, responsible, secretly yearning for more. You hold everything together while quietly dreaming of escape."
+                description: "Caring, responsible, secretly yearning for more. You hold everything together while quietly dreaming of escape.",
+                image: "https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/karen.png"
             }
         };
 
         const tiebreakOrder = ["Eleven", "Max", "Dustin", "Steve", "Robin", "Lucas", "Mike", "Will", "Erica", "Billy", "Vecna", "Karen"];
+
+        // Background music
+        const bgMusic = new Audio('https://raw.githubusercontent.com/LogicNerds/neonbreadstrangerthings/main/assets/the-game-begins-epic-sci-fi-action-intro-221133.mp3');
+        bgMusic.loop = true;
 
         let currentQuestion = 0;
         let scores = {
@@ -475,6 +492,11 @@
             document.getElementById('quizContainer').classList.add('active');
             renderQuestions();
             showQuestion(0);
+            
+            // Start background music
+            bgMusic.play().catch(err => {
+                console.log("Audio autoplay blocked:", err);
+            });
         }
 
         function renderQuestions() {
@@ -553,6 +575,7 @@
             document.getElementById('resultScreen').classList.add('active');
             document.getElementById('resultCharacter').textContent = result.name.toUpperCase();
             document.getElementById('resultDescription').textContent = result.description;
+            document.getElementById('resultImage').src = result.image;
             updateProgress(questions.length);
         }
 
